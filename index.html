@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>広告表現チェッカー</title>
+<style>
+  :root {
+    --bg: #8C4A2F;
+    --surface: #FFFFFF;
+    --on-bg: #FBEDE7;
+    --text: #241610;
+    --text-sub: #6B5248;
+    --accent: #A03A16;
+    --hl-bg: #F5C86A;
+    --hl-text: #3D2A0C;
+    --chip-bg: #EBDDD4;
+    --chip-text: #5A4034;
+    --notice-bg: #F7EAE4;
+    --notice-text: #5B3421;
+    --danger: #B3261E;
+    --border: #BE9A85;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; }
+
+  header { margin-bottom: 16px; }
+  h1 { font-size: 18px; margin: 0 0 8px; color: var(--on-bg); }
+  .lead { font-size: 14px; margin: 0; color: var(--on-bg); }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  h2 { font-size: 18px; margin: 0 0 8px; }
+  h2.scope { font-size: 16px; }
+  h2.result { color: var(--accent); }
+
+  .notice {
+    background: var(--notice-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .notice p {
+    font-size: 14px;
+    color: var(--notice-text);
+    margin: 0 0 4px;
+  }
+  .notice p:last-child { margin-bottom: 0; }
+
+  textarea {
+    display: block;
+    width: 100%;
+    min-height: 176px;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    resize: vertical;
+  }
+  .counter { font-size: 12px; color: var(--text-sub); margin: 8px 0 0; }
+  .error {
+    font-size: 14px;
+    color: var(--danger);
+    margin: 8px 0 0;
+    font-weight: bold;
+  }
+
+  .scope-list { font-size: 14px; margin: 0 0 8px; padding-left: 20px; }
+  .scope-list li { margin: 0; }
+  .scope-note { font-size: 14px; color: var(--text-sub); margin: 0; }
+
+  .count-line { font-size: 14px; margin: 0 0 16px; }
+  .count-line strong { font-size: 18px; }
+
+  .preview {
+    font-size: 16px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    margin: 0 0 16px;
+  }
+  .preview mark {
+    background: var(--hl-bg);
+    color: var(--hl-text);
+    border-bottom: 2px solid var(--accent);
+  }
+
+  h3.hits-heading { font-size: 14px; margin: 0 0 8px; }
+  .hit { margin: 0 0 16px; }
+  .hit:last-child { margin-bottom: 0; }
+  .hit-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+  .hit-term { font-size: 16px; font-weight: bold; }
+  .chip {
+    font-size: 12px;
+    padding: 4px 8px;
+    background: var(--chip-bg);
+    color: var(--chip-text);
+    border-radius: 6px;
+    white-space: nowrap;
+  }
+  .hit-note { font-size: 14px; color: var(--text-sub); margin: 4px 0 0; }
+
+  .footer-note { font-size: 14px; color: var(--on-bg); margin: 0 0 16px; }
+
+  button {
+    display: block;
+    width: 100%;
+    height: 48px;
+    font-family: inherit;
+    font-size: 16px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>広告表現チェッカー</h1>
+    <p class="lead">書いた販促文に、一度立ち止まって見直したい言葉が入っていないかを確かめます</p>
+  </header>
+
+  <div class="notice">
+    <p>このツールは、法令に違反しているかどうかを判定するものではありません。</p>
+    <p>あらかじめ用意した「一度立ち止まって見直したい言葉」のリストと、入力された文章を機械的に照らし合わせているだけの簡易チェックです。</p>
+    <p>ここで何も見つからなくても問題がないとは限らず、見つかった言葉がそのまま使えないという意味でもありません。</p>
+    <p>実際に掲載してよいかどうかは、必ず専門家（弁護士・行政書士・広告表現に詳しい専門家など）にご確認ください。</p>
+  </div>
+
+  <div class="card">
+    <h2>文章を貼る</h2>
+    <textarea id="input" rows="8" placeholder="例）当店のオリジナル美容液は…" aria-label="販促文を貼り付ける"></textarea>
+    <p class="counter" id="counter">0 / 5,000文字</p>
+    <p class="error hidden" id="error"></p>
+  </div>
+
+  <div class="card">
+    <h2 class="scope">この道具が見ている4つの観点</h2>
+    <ul class="scope-list">
+      <li>一番・最上級を示す言葉</li>
+      <li>効果を言い切る言葉</li>
+      <li>安全性を言い切る言葉</li>
+      <li>お得さ・希少性を強める言葉</li>
+    </ul>
+    <p class="scope-note">からだの変化（治る・効く・予防できる など）に関わる表現は、この道具では扱っていません。その分野の言い回しは判断がとても難しいため、専門家にご相談ください。</p>
+  </div>
+
+  <div class="card hidden" id="result">
+    <h2 class="result">気になった言葉</h2>
+    <p class="count-line" id="countLine"></p>
+    <div class="preview" id="preview"></div>
+    <h3 class="hits-heading hidden" id="hitsHeading">見つかった言葉（種類）</h3>
+    <div id="hits"></div>
+  </div>
+
+  <div class="notice">
+    <p>このツールは、法令に違反しているかどうかを判定するものではありません。</p>
+    <p>あらかじめ用意した「一度立ち止まって見直したい言葉」のリストと、入力された文章を機械的に照らし合わせているだけの簡易チェックです。</p>
+    <p>ここで何も見つからなくても問題がないとは限らず、見つかった言葉がそのまま使えないという意味でもありません。</p>
+    <p>実際に掲載してよいかどうかは、必ず専門家（弁護士・行政書士・広告表現に詳しい専門家など）にご確認ください。</p>
+  </div>
+
+  <p class="footer-note">入力した文章はこの画面の中だけで処理され、どこにも送信されません。</p>
+
+  <button type="button" id="clear">入力を消す</button>
+
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var TAIL = 'と受け取られることがあります。使う場合は、そう言い切れる根拠が手元にあるかを確かめ、必要なら専門家にご確認ください。';
+  var MAX = 5000;
+  var MAX_LABEL = '5,000';
+
+  // 仕様カード（day-037-design-spec-022-ad-wording-checker.md）の確定24語。
+  // 増やさない・減らさない。注意文は「<受け取られ方>+TAIL」の定型のみ。
+  var WORDS = [
+    { term: '日本一',        chip: '最上級',       lead: '国内の同種の商品・サービスの中で一番だと言い切っている' },
+    { term: 'No.1',          chip: '最上級',       lead: '何らかの調査で1位になったと示している' },
+    { term: '最高級',        chip: '最上級',       lead: '品質や等級が最上位だと言い切っている' },
+    { term: '最安値',        chip: '最上級',       lead: '他店より価格が安いと言い切っている' },
+    { term: '世界初',        chip: '最上級',       lead: '世界で最初の取り組みだと言い切っている' },
+    { term: '唯一無二',      chip: '最上級',       lead: '他に同じものが存在しないと言い切っている' },
+    { term: '必ず痩せ',      chip: '効果の断定',   lead: '誰が使っても体重が減ると約束している' },
+    { term: '必ず効く',      chip: '効果の断定',   lead: '誰が使っても効き目が出ると約束している' },
+    { term: '効果絶大',      chip: '効果の断定',   lead: '大きな効き目が出ることが決まっている' },
+    { term: '誰でも簡単',    chip: '効果の断定',   lead: '例外なく全員が簡単にできる' },
+    { term: '今すぐ実感',    chip: '効果の断定',   lead: '使ってすぐに変化が出ると約束している' },
+    { term: '驚きの効果',    chip: '効果の断定',   lead: 'はっきりした変化が出ることが決まっている' },
+    { term: '副作用なし',    chip: '安全性の断定', lead: '望ましくない反応が起きないと言い切っている' },
+    { term: '副作用は一切',  chip: '安全性の断定', lead: '望ましくない反応が一つも起きないと言い切っている' },
+    { term: 'リスクゼロ',    chip: '安全性の断定', lead: '損をしたり不都合が起きたりする可能性がないと言い切っている' },
+    { term: '絶対安全',      chip: '安全性の断定', lead: 'どんな使い方でも危険がないと言い切っている' },
+    { term: '無添加',        chip: '安全性の断定', lead: '何が加えられていないのかを示さないまま、安心だ' },
+    { term: '失敗しません',  chip: '安全性の断定', lead: 'うまくいかない場合がないと言い切っている' },
+    { term: '完全無料',      chip: 'お得さの強調', lead: '一切お金がかからないと言い切っている' },
+    { term: '今だけ',        chip: 'お得さの強調', lead: 'この機会を逃すと同じ条件では買えないと示している' },
+    { term: '激安',          chip: 'お得さの強調', lead: '相場よりかなり安いと言い切っている' },
+    { term: '破格',          chip: 'お得さの強調', lead: '通常ではありえない価格だと言い切っている' },
+    { term: '数量限定',      chip: 'お得さの強調', lead: '用意した数に限りがあると示している' },
+    { term: '最後のチャンス', chip: 'お得さの強調', lead: 'これ以降は同じ機会がないと言い切っている' }
+  ];
+
+  var input = document.getElementById('input');
+  var counter = document.getElementById('counter');
+  var errorEl = document.getElementById('error');
+  var result = document.getElementById('result');
+  var countLine = document.getElementById('countLine');
+  var preview = document.getElementById('preview');
+  var hitsHeading = document.getElementById('hitsHeading');
+  var hits = document.getElementById('hits');
+  var clearBtn = document.getElementById('clear');
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+  }
+
+  // 元テキスト上でマッチ範囲を集め、重なりを潰してから区間ごとにエスケープして組み立てる。
+  function buildPreview(text, ranges) {
+    var html = '';
+    var pos = 0;
+    for (var i = 0; i < ranges.length; i++) {
+      var r = ranges[i];
+      html += escapeHtml(text.slice(pos, r[0]));
+      html += '<mark>' + escapeHtml(text.slice(r[0], r[1])) + '</mark>';
+      pos = r[1];
+    }
+    html += escapeHtml(text.slice(pos));
+    return html;
+  }
+
+  function findRanges(text) {
+    var ranges = [];
+    var found = [];
+    for (var i = 0; i < WORDS.length; i++) {
+      var w = WORDS[i];
+      var idx = text.indexOf(w.term);
+      var any = false;
+      while (idx !== -1) {
+        ranges.push([idx, idx + w.term.length]);
+        any = true;
+        idx = text.indexOf(w.term, idx + 1);
+      }
+      if (any) { found.push(w); }
+    }
+    ranges.sort(function (a, b) { return a[0] - b[0] || b[1] - a[1]; });
+    var merged = [];
+    for (var j = 0; j < ranges.length; j++) {
+      var last = merged[merged.length - 1];
+      if (last && ranges[j][0] <= last[1]) {
+        if (ranges[j][1] > last[1]) { last[1] = ranges[j][1]; }
+      } else {
+        merged.push([ranges[j][0], ranges[j][1]]);
+      }
+    }
+    return { ranges: merged, found: found };
+  }
+
+  function render() {
+    var text = input.value;
+    // 絵文字などのサロゲートペアを1文字として数える（表示・上限判定のみ。
+    // findRanges / buildPreview のインデックスはUTF-16のままで整合が取れている）。
+    var len = Array.from(text).length;
+    counter.textContent = len.toLocaleString('en-US') + ' / ' + MAX_LABEL + '文字';
+
+    if (len > MAX) {
+      counter.classList.add('hidden');
+      errorEl.textContent = '⚠ ' + MAX_LABEL + '文字を超えています。短くしてからもう一度お試しください。';
+      errorEl.classList.remove('hidden');
+      result.classList.add('hidden');
+      return;
+    }
+    counter.classList.remove('hidden');
+    errorEl.classList.add('hidden');
+    errorEl.textContent = '';
+
+    if (text.length === 0) {
+      result.classList.add('hidden');
+      return;
+    }
+    result.classList.remove('hidden');
+
+    var r = findRanges(text);
+    preview.innerHTML = buildPreview(text, r.ranges);
+
+    hits.textContent = '';
+    if (r.found.length === 0) {
+      countLine.textContent = '内蔵リストの言葉は見つかりませんでした。リストにない表現が問題になることもあります';
+      hitsHeading.classList.add('hidden');
+      return;
+    }
+
+    countLine.innerHTML = '気になった言葉が <strong>' + r.found.length + '件</strong> 見つかりました（種類で数えています）';
+    hitsHeading.classList.remove('hidden');
+
+    for (var i = 0; i < r.found.length; i++) {
+      var w = r.found[i];
+
+      var box = document.createElement('div');
+      box.className = 'hit';
+
+      var head = document.createElement('div');
+      head.className = 'hit-head';
+
+      var term = document.createElement('span');
+      term.className = 'hit-term';
+      term.textContent = w.term;
+
+      var chip = document.createElement('span');
+      chip.className = 'chip';
+      chip.textContent = w.chip;
+
+      head.appendChild(term);
+      head.appendChild(chip);
+
+      var note = document.createElement('p');
+      note.className = 'hit-note';
+      note.textContent = w.lead + TAIL;
+
+      box.appendChild(head);
+      box.appendChild(note);
+      hits.appendChild(box);
+    }
+  }
+
+  input.addEventListener('input', render);
+  clearBtn.addEventListener('click', function () {
+    input.value = '';
+    render();
+    input.focus();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
