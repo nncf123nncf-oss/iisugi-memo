@@ -136,6 +136,30 @@
     cursor: pointer;
   }
   .hidden { display: none; }
+
+  /* --- 運営者表記フッタ（全Day共通・2026-09-13追加） -------------------
+     Safe Browsing の誤判定対策。ページごとに配色が違うため、ページ側の
+     CSS変数に依存せず自己完結させる（薄い面＋濃い文字で、明るい背景でも
+     暗い背景でも読める）。ツール本体のスタイルには一切触れない。 */
+  .mw-footer {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin: 24px 0 0;
+    padding: 16px;
+    background: #F7F7F8;
+    border: 1px solid #D8D8DC;
+    border-radius: 6px;
+    color: #3A3A3E;
+    font-family: system-ui, sans-serif;
+    font-size: 12px;
+    line-height: 1.7;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+  .mw-footer p { margin: 0 0 6px; }
+  .mw-footer p:last-child { margin-bottom: 0; }
+  .mw-footer a { color: #0B5AA6; }
 </style>
 </head>
 <body>
@@ -186,9 +210,14 @@
     <p>実際に掲載してよいかどうかは、必ず専門家（弁護士・行政書士・広告表現に詳しい専門家など）にご確認ください。</p>
   </div>
 
-  <p class="footer-note">入力した文章はこの画面の中だけで処理され、どこにも送信されません。</p>
-
   <button type="button" id="clear">入力を消す</button>
+
+  <footer class="mw-footer">
+    <p>みちAIワークス（MICHI AI WORKS）／代表 田中　泉</p>
+    <p>運営: <a href="https://michi-portfolio.vercel.app/" rel="noopener">みちAIワークス 公式サイト</a>（https://michi-portfolio.vercel.app/ ）／ お問い合わせ: <a href="mailto:nncf123nncf@gmail.com">nncf123nncf@gmail.com</a></p>
+    <p>このツールはブラウザの中だけで動きます。入力した内容の送信・保存・収集は一切行いません。</p>
+    <p>ログイン・会員登録・パスワードの入力を求めることはありません。</p>
+  </footer>
 
 </div>
 
